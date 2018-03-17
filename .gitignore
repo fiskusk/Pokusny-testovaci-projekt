@@ -1,0 +1,7 @@
+Debug
+Release
+*.xml
+*.atsln
+*.cproj
+*.atsuo
+*.tags*
