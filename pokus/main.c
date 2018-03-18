@@ -26,11 +26,26 @@ int main(void)
 	lcd_init(LCD_DISP_ON);
     lcd_clrscr();
 	
+    // internaly reference
+    // 0. external AREF (internal Vref disabled), 
+    // 1. AVCC with external cap at AREF pin, 
+    // 2. reserved
+    // 3. Internal 1,1V voltage ref. with external cap on AREF pin
 	ADMUX = (1<<REFS1) | (1<<REFS0);
+                    
+    // ADENable, ADStart Conversion, ADInterrupt Enable
+    // when set ADATE - ADCH MSB, ADCL LSB 
+    // ADPrescaler Select - 2,2,4,8,16,32,64,128
 	ADCSRA = (1<<ADEN) | (1<<ADSC) | (1<<ADIE) | (1<<ADATE) | (1<<ADPS0) | (1<<ADPS1) | (1<<ADPS2);
-    sei();
+    sei();                               // global interrupt enable
     while (1) 
     {
+        cela_cast = des_tvar;
+        desetinna = (des_tvar - (float)cela_cast)*10000;
+        
+        itoa(desetinna,buffer2,10);
+        itoa(cela_cast,buffer,10);
+        
         uart_puts(buffer2);
         uart_putc('\n');
         
@@ -38,7 +53,7 @@ int main(void)
         lcd_puts(buffer);
         lcd_putc(',');
         lcd_puts(buffer2);
-        lcd_puts("   ");
+        lcd_puts(" V  ");
         
         _delay_ms(250);
         
@@ -47,14 +62,6 @@ int main(void)
 
 ISR(ADC_vect)
 {
-    cli();
     des_tvar = (ADC*1.1)/1023.0;
-    cela_cast = des_tvar;
-    // 
-    desetinna = ((float)des_tvar - (float)cela_cast)*1000;
-    
-    itoa(desetinna,buffer2,10);
-    itoa(cela_cast,buffer,10);
-    sei();
 }
 
